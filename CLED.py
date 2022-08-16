@@ -1,5 +1,7 @@
 import zipfile,re,os,urllib.request
 import redis, psycopg2
+import sys
+from subprocess import PIPE,Popen 
 
 # class to work with .zip file
 class zipworker:
@@ -60,6 +62,17 @@ class dbworker:
     def restoreDB(self):
         command = 'pg_restore -d postgresql://{0}:{1}@{2}:{3}/{4} -v '.format(self.pgUserName,self.pgDataBasePassword,self.pgHostAdres,self.pgHostPort,self.pgDataBaseName)
         command = command + self.pgBackUpFilePath
+        сonsoleworker.cout(self, command)
 
 
+# Class to mork with CMD
+class сonsoleworker:
+    def cout(self, string):
+        Popen(string,shell=False,stdin=PIPE,stdout=PIPE,stderr=PIPE)
+
+    def cin(self):
+        command_list = sys.argv[:]
+        command_list.pop(0)
+
+        return command_list
 
