@@ -1,7 +1,13 @@
+# import for zipworker class
 import zipfile,re,os,urllib.request
+# import for dbworker class
 import redis, psycopg2
+# import for сonsoleworker class
 import sys
-from subprocess import PIPE,Popen 
+from subprocess import PIPE,Popen
+# import for replacer class
+import json, xml.dom.minidom
+ 
 
 # class to work with .zip file
 class zipworker:
@@ -11,9 +17,9 @@ class zipworker:
         self.pathToFile = os.getcwd()
         urllib.request.urlretrieve(link, self.fileName)
 
-    def unPackZip(self):
+    def unPackZip(self, path):
         with zipfile.ZipFile(self.fileName, 'r') as zipObj:
-            zipObj.extractall("folder")
+            zipObj.extractall(path)
 
 # class to work with Redis and PostgerSQL
 class dbworker:
@@ -76,3 +82,36 @@ class сonsoleworker:
 
         return command_list
 
+
+class replacer:
+    def json_imside_layer(self, json, params_list, changes):
+        if len(params_list) == 1:
+            param = params_list[0]
+            json[param] = changes
+        else:
+            json = json[params_list[0]]
+            self.json_imside_layer(json,params_list[1:],changes)
+
+
+    def json_file(self, path, params, changes):
+        file =  open(path)
+        data = json.load(file)
+        params_list = params.split(".")
+
+        self.json_imside_layer(data,params_list, changes)
+
+    def xml_attribute(self, path, element, element_value,target_element, target_element_value, tag_name):
+        mydoc = xml.dom.minidom.parse(path)
+        stud = mydoc.getElementsByTagName(tag_name)
+        for name in stud:
+            if name.getAttribute(element) == element_value:
+                name.setAttribute(target_element, target_element_value)
+                print(name.getAttribute("value"))
+                mydoc.toxml()
+                
+        file = open("Terrasoft.WebHost.dll.config", "w+")
+        file.write(mydoc.toxml())
+    
+
+    
+    
