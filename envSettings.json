@@ -1,0 +1,8 @@
+{
+    "BinaryPath": "",
+    "Name": "" ,
+    "DbName": "" ,
+    "RedisDbNumber": 0,
+    "StartAfterDeployment": true,
+    "Port":0
+  }
