@@ -1,8 +1,9 @@
 {
-    "BinaryPath": "",
-    "Name": "" ,
+    "BinaryPath": "D:/CLEDstaff/8.0.2.2447_Studio_Linux_Softkey_PostgreSQL_ENU_NetCore.zip",
+    "Name": "Creatio" ,
     "DbName": "" ,
     "RedisDbNumber": 0,
     "StartAfterDeployment": true,
-    "Port":0
+    "StartBrouserAfterDeployment": true,
+    "Port":5000
   }

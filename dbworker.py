@@ -1,4 +1,5 @@
-import redis, psycopg2, ast
+import redis, psycopg2, ast, re
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 class DBWorker:
     def __init__(self, redis_connection_string, pg_connection_string):
@@ -53,7 +54,6 @@ class DBWorker:
 
             # Postgres data init 
         
-        
             if postgres_dict["Port"] == "":
                 self.postgres_port=5432
             else:
@@ -69,10 +69,10 @@ class DBWorker:
             else:
                 self.postgres_password=postgres_dict["Password"]
 
-            if postgres_dict["User"] == "":
+            if postgres_dict["UserID"] == "":
                 self.postgres_user=""
             else:
-                self.postgres_user=postgres_dict["User"]
+                self.postgres_user=postgres_dict["UserID"]
 
             if postgres_dict["Host"] == "":
                 self.postgres_host="127.0.0.1"
@@ -117,11 +117,56 @@ class DBWorker:
 
             if ansver == 1:
                 return True
+
+            connection.close()
         
         except Exception as e:
             return False
 
-    def get_restore_command(self, file_path):
-        command = 'pg_restore -d postgresql://{0}:{1}@{2}:{3}/{4} -v '.format(self.postgres_user,self.postgres_password,self.postgres_host,self.postgres_port,self.postgres_database)
+    def create_database(self, name):
+        try:
+            connection = psycopg2.connect(user=self.postgres_user,
+                                    password=self.postgres_password,
+                                    host=self.postgres_host,
+                                    port=self.postgres_port)
+
+            connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT) 
+
+            cursor = connection.cursor()
+            postgreSQL_select_Query = "SELECT datname FROM pg_database"
+
+            cursor.execute(postgreSQL_select_Query)
+            mobile_records = cursor.fetchall()
+            cursor.close()
+
+            name = name.lower()
+
+            regex = "(^"+name+"_\d+$)|(^"+name+"$)"
+
+            bd_name_counter = 0 
+            for i in mobile_records:
+
+                
+
+                if bool(re.search(regex, i[0].lower())):
+                    bd_name_counter += 1
+
+            if bd_name_counter == 0:
+                db_name = name
+            else:
+                db_name = name+"_"+str(bd_name_counter)
+            
+            postgreSQL_select_Query = "CREATE DATABASE "+ db_name
+
+            cursor2 = connection.cursor()
+            cursor2.execute(postgreSQL_select_Query)
+            cursor2.close()
+            return True, db_name
+        
+        except Exception as e:
+            return False
+
+    def get_restore_command(self, file_path, name):
+        command = 'pg_restore -d postgresql://{0}:{1}@{2}:{3}/{4} -v '.format(self.postgres_user,self.postgres_password,self.postgres_host,self.postgres_port,name)
         command = command + file_path
         return command
