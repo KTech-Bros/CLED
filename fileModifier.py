@@ -1,4 +1,4 @@
-import json, xml.dom.minidom, os, sys
+import json, xml.dom.minidom, os, classes
 
 
 def _replase_json(json, params_list, changes):
@@ -41,7 +41,7 @@ def del_json_param(path, params):
 
 def change_xml_attribute(path, element, element_value, target_element, target_element_value, tag_name):
 
-
+    print(path)
 
     mydoc = xml.dom.minidom.parse(path)
     stud = mydoc.getElementsByTagName(tag_name)
@@ -56,14 +56,16 @@ def change_xml_attribute(path, element, element_value, target_element, target_el
 
     
 
-def change_xml_files(path, params_list):
+def change_xml_files(path, params_list:list[classes.xmlParamiters]):
 
     original_path = os.path.dirname(os.path.abspath(__file__))
     os.chdir(path)
 
     for param_example in params_list:
-        path_o_file = os.path.join(path, param_example["file_name"])
+        path_o_file = os.path.join(path, param_example.file_path)
         if os.path.exists(path_o_file):
-            change_xml_attribute(path_o_file, param_example["element"], param_example["element_value"],param_example["target_element"],param_example["target_element_value"], param_example["tag_name"])
+            change_xml_attribute(path_o_file, param_example.element, 
+                            param_example.element_value, param_example.target_element,
+                            param_example.target_element_value, param_example.tag_name)
 
     os.chdir(original_path)

@@ -1,5 +1,5 @@
 import unittest, random, sys, re
-import fileModifier, dbworker
+import fileModifier, dbWorker
 
 
 
@@ -39,22 +39,22 @@ class TestFileModifier(unittest.TestCase):
     
 class TestDBWorker(unittest.TestCase):
     def test_redis_sucsesful_ping(self):
-        data_base = dbworker.DBWorker("host=127.0.0.1;db=0;port=6379;password=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81",None)
+        data_base = dbWorker.DBWorker("host=127.0.0.1;db=0;port=6379;password=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81",None)
         
         self.assertEqual(True, data_base.ping_redis(), "The ping on redis failed! (is connection string correct?)")
 
     def test_redis_unsucsesful_ping(self):
-        data_base = dbworker.DBWorker("host=127.0.0.1;db=0;port=378;password=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81",None)
+        data_base = dbWorker.DBWorker("host=127.0.0.1;db=0;port=378;password=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81",None)
         
         self.assertEqual(False, data_base.ping_redis(), "The ping on redis didn't failed! (is connection string uncorrect?)")
 
     def test_postgres_sucsesful_ping(self):
-        data_base = dbworker.DBWorker(None,"Port=5432;Database=test;User=postgresuser;Password=postgrespassword;Host=127.0.0.1")
+        data_base = dbWorker.DBWorker(None,"Port=5432;Database=test;User=postgresuser;Password=postgrespassword;Host=127.0.0.1")
         
         self.assertEqual(True, data_base.ping_postgre(), "The ping on postgres failed! (is connection string correct?)")
 
     def test_postgres_unsucsesful_ping(self):
-        data_base = dbworker.DBWorker(None,"Port=543112;Database=test;User=postgresuser;Password=postgrespassword;Host=127.0.0.1")
+        data_base = dbWorker.DBWorker(None,"Port=543112;Database=test;User=postgresuser;Password=postgrespassword;Host=127.0.0.1")
         
         self.assertEqual(False, data_base.ping_postgre(), "The ping on postgres failed! (is connection string correct?)")
 

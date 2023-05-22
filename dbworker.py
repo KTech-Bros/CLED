@@ -1,38 +1,17 @@
-import redis, psycopg2, ast, re
+import classes
+import redis, psycopg2, re
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 class DBWorker:
-    def __init__(self, redis_connection_string, pg_connection_string):
+    def __init__(self, settings: classes.appSettings):
 
         # Redis connecting string parse
-        if type(redis_connection_string) != type(None):
-            redis_dict = "{'"+redis_connection_string+"'}"
-            redis_dict = redis_dict.replace(" ","")
-            redis_dict = redis_dict.replace("=","':'")
-            redis_dict = redis_dict.replace(";","','")
-            redis_dict = ast.literal_eval(redis_dict)
-
-            # Redis data init 
-        
-            if redis_dict["host"] == "":
-                self.redis_host="127.0.0.1"
-            else:
-                self.redis_host=redis_dict["host"]
-
-            if redis_dict["db"] == "":
-                self.redis_db="0"
-            else:
-                self.redis_db=redis_dict["db"]
-
-            if redis_dict["port"] == "":
-                self.redis_port="0"
-            else:
-                self.redis_port=redis_dict["port"]
-
-            if redis_dict["password"] == "":
-                self.redis_password=""
-            else:
-                self.redis_password=redis_dict["password"]
+        if settings.app_settings.redis_connection_string != None:
+            
+            self.redis_host=settings.app_settings.redis_host
+            self.redis_db=settings.app_settings.redis_db
+            self.redis_port=settings.app_settings.redis_port
+            self.redis_password=settings.app_settings.redis_password
 
         else:
             self.redis_host="127.0.0.1"
@@ -40,54 +19,27 @@ class DBWorker:
             self.redis_port="0"
             self.redis_password=""
         
-        self.redis_connection_string = redis_connection_string
+        self.redis_connection_string = settings.app_settings.redis_connection_string
 
         # Postgres connecting string parse
 
-        if type(pg_connection_string) != type(None):
+        if settings.app_settings.dbConnectionString != None:
 
-            postgres_dict = "{'"+pg_connection_string+"'}"
-            postgres_dict = postgres_dict.replace(" ","")
-            postgres_dict = postgres_dict.replace("=","':'")
-            postgres_dict = postgres_dict.replace(";","','")
-            postgres_dict = ast.literal_eval(postgres_dict)
-
-            # Postgres data init 
-        
-            if postgres_dict["Port"] == "":
-                self.postgres_port=5432
-            else:
-                self.postgres_port=int(postgres_dict["Port"])
-
-            if postgres_dict["Database"] == "":
-                self.postgres_database=""
-            else:
-                self.postgres_database=postgres_dict["Database"]
-
-            if postgres_dict["Password"] == "":
-                self.postgres_password=""
-            else:
-                self.postgres_password=postgres_dict["Password"]
-
-            if postgres_dict["UserID"] == "":
-                self.postgres_user=""
-            else:
-                self.postgres_user=postgres_dict["UserID"]
-
-            if postgres_dict["Host"] == "":
-                self.postgres_host="127.0.0.1"
-            else:
-                self.postgres_host=postgres_dict["Host"]
-
+            self.postgres_port=settings.app_settings.postgres_port
+            self.postgres_password=settings.app_settings.postgres_password
+            self.postgres_user=settings.app_settings.postgres_user
+            self.postgres_host=settings.app_settings.postgres_host
+            
         else:
 
             self.postgres_port=5432
-            self.postgres_database=""
             self.postgres_password=""
             self.postgres_user=""
             self.postgres_host="127.0.0.1"
 
-        self.pg_connection_string = pg_connection_string
+        
+        self.postgres_database="postgres"
+        self.pg_connection_string = settings.app_settings.dbConnectionString
     
     def ping_redis(self):
         try:
@@ -104,6 +56,7 @@ class DBWorker:
     def ping_postgre(self):
         try:
             connection = psycopg2.connect(user=self.postgres_user,
+                                    dbname=self.postgres_database,
                                     password=self.postgres_password,
                                     host=self.postgres_host,
                                     port=self.postgres_port)
@@ -126,6 +79,7 @@ class DBWorker:
     def create_database(self, name):
         try:
             connection = psycopg2.connect(user=self.postgres_user,
+                                    dbname=self.postgres_database,
                                     password=self.postgres_password,
                                     host=self.postgres_host,
                                     port=self.postgres_port)
@@ -164,9 +118,9 @@ class DBWorker:
             return True, db_name
         
         except Exception as e:
-            return False
+            return False, ""
 
-    def get_restore_command(self, file_path, name):
-        command = 'pg_restore -d postgresql://{0}:{1}@{2}:{3}/{4} -v '.format(self.postgres_user,self.postgres_password,self.postgres_host,self.postgres_port,name)
-        command = command + file_path
+    def get_restore_command(self, restore_path, file_path, name):
+        command = '"'+restore_path+'" -d postgresql://{0}:{1}@{2}:{3}/{4} -v '.format(self.postgres_user,self.postgres_password,self.postgres_host,self.postgres_port,name)
+        command = command + '"' + file_path + '"'
         return command

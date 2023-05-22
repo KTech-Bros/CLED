@@ -1,11 +1,14 @@
 {
     "DataBase":{
-      "connectionString": "Port=5432;Database=asssaasssa;User ID=postgresuser;Password=postgrespassword;Host=127.0.0.1"
+      "connectionString": "Port=5432;UserID=postgresuser;Password=postgrespassword;Host=localhost"
     },
     "Redis":{
-      "connectionString": "host=127.0.0.1;db=0;port=6379;password=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81"
+      "connectionString": "host=127.0.0.1;db=1;port=6379;password=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81"
     },
     "Environments":{
       "rootDirectory": "D:\\CreatioFolder" 
-    }
+    },
+    "Postgres":{
+      "rootDirectory": "D:\\ProgramFiles\\v6" 
+  }
 }
